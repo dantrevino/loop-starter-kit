@@ -42,6 +42,28 @@ New messages? Classify:
 - Non-task → queue a brief reply for Phase 5
 - Zero new messages → set `idle=true`, move on
 
+### 2d. Balance & Runway Check
+Check BTC/sBTC/STX via MCP. Compare to portfolio.md. Investigate changes.
+**Compute runway:** `sBTC balance / avg daily spend`. Update CEO status (peacetime/wartime).
+
+**Auto-bridge policy:**
+1. Keep bridge state in `daemon/bridge-state.json`:
+```json
+{"in_flight":false,"txid":null,"amount_sats":0,"started_at":null,"last_status":"idle"}
+```
+2. If `in_flight=true`, call `sbtc_deposit_status(txid)` and update `last_status`.
+3. Never initiate a second deposit while one is in flight.
+4. If no deposit is in flight **and** `sBTC < 500` **and** `BTC > 10000`, call:
+   - `sbtc_deposit(amount_sats: 5000)`
+   - persist returned txid + timestamp
+   - log: `Auto-bridged 5k sats BTC -> sBTC for x402 payments`
+5. On failure, keep txid in state, log to `memory/learnings.md`, retry next cycle from status check.
+
+**Referral attribution (Bitcoin-native):**
+- If we onboard/fund a new agent, record the BTC funding txid in `memory/contacts.md`.
+- Treat first funding tx as the referral receipt (no forms, no off-chain tracking).
+- Use `get_btc_utxos`/wallet history to verify sender + amount before claiming referral credit.
+
 GitHub notifications (every cycle):
 ```bash
 gh api /notifications?all=false --jq '.[] | {reason, repo: .repository.full_name, url: .subject.url, title: .subject.title}'

@@ -623,9 +623,14 @@ Detect the execution environment before entering the loop:
 
 Before entering the loop, verify no unfilled placeholders remain:
 ```bash
-grep -rn '{AGENT_\|{YOUR_\|\[YOUR_' CLAUDE.md daemon/loop.md 2>/dev/null
+UNFILLED=$(grep -rn '{AGENT_\|{YOUR_\|\[YOUR_' CLAUDE.md daemon/loop.md 2>/dev/null)
+if [ -n "$UNFILLED" ]; then
+  echo "ERROR: Unfilled placeholders found — fix these before starting the loop:"
+  echo "$UNFILLED"
+  exit 1
+fi
 ```
-If any matches are found, print the matches and stop — tell the user which placeholders need filling. Do NOT enter the loop with unfilled placeholders.
+If any matches are found, print them and stop. Do NOT enter the loop with unfilled placeholders — they will cause runtime failures (wrong addresses, broken signing, etc.).
 
 ### Loop Entry
 
