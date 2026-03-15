@@ -200,7 +200,7 @@ Output cycle summary, then exit. The bash wrapper or platform handles sleep + re
 | cycle % 6 == 4 | Monitor bounties | none |
 | cycle % 6 == 5 | Self-audit (spawn scout on own repos) | none |
 | Every 50th cycle | CEO review: read `daemon/ceo.md` | ceo.md (~1.3k tokens) |
-| Every 10th cycle | Evolve: edit THIS file if improvement found | none |
+| Every 10th cycle | Evolve: edit THIS file if improvement found | loop.md.bak (backup) |
 
 ---
 
@@ -248,6 +248,77 @@ Any phase fails → log it, increment circuit breaker, continue to next phase.
 - outbox.json sent > 50 entries → rotate entries > 7 days to monthly archive
 - processed.json > 200 entries → keep last 30 days
 - queue.json > 10 completed → archive completed/failed > 7 days
+
+---
+
+## Phase 10: Evolve (every 10th cycle, if cycle >= 10)
+
+**Only execute if `cycle % 10 == 0` AND `cycle >= 10`. Otherwise skip this phase.**
+
+### Pre-flight Checks
+
+1. **Backup current loop.md:**
+   ```bash
+   cp daemon/loop.md daemon/loop.md.bak
+   ```
+
+2. **Verify backup exists before proceeding.**
+
+3. **Protected Sections — NEVER modify these:**
+   - Lines containing `## Cycle Start` through `## Phase 9: Sleep`
+   - Lines containing `## Protected Sections`
+   - The entire `## Evolution Guardrails` section
+   - The `## Evolution Log` section (only ADD new entries, never delete)
+
+4. **Protected Patterns — DO NOT remove:**
+   - Cost guardrails (budget limits, maturity levels)
+   - Trusted sender validation
+   - Circuit breaker patterns
+   - Wallet security rules
+   - Any `**DO NOT**` or `**NEVER**` directive
+
+### Evolution Process
+
+1. Read `memory/learnings.md` for patterns (not one-off issues)
+2. Identify 1-2 genuine improvements (repeated issues, efficiency gains)
+3. Make targeted edits to unprotected sections only
+4. After edit, verify:
+   ```bash
+   # Check that protected sections are intact
+   grep -q "## Protected Sections" daemon/loop.md && echo "Protected marker OK" || echo "ERROR: Protected marker missing"
+   grep -q "Circuit breaker" daemon/loop.md && echo "Circuit breaker OK" || echo "ERROR: Circuit breaker removed"
+   ```
+
+5. **If verification fails:**
+   ```bash
+   cp daemon/loop.md.bak daemon/loop.md
+   echo "Evolution rejected — protected section violated" >> memory/journal.md
+   ```
+
+6. **If verification passes:** Commit the backup remains for rollback:
+   ```bash
+   git add daemon/loop.md daemon/loop.md.bak memory/
+   ```
+
+### Evolution Log Template
+
+After successful evolution, append to `## Evolution Log` below:
+```
+- vX → vY (cycle N): <brief description of what changed and why>
+```
+
+---
+
+## Evolution Guardrails
+
+**These rules prevent accidental self-sabotage:**
+
+1. **Never remove cost guardrails** — budget limits, maturity levels, circuit breakers
+2. **Never modify protected sections** — marked with `## Protected Sections`
+3. **Always backup before editing** — `cp loop.md loop.md.bak`
+4. **Verify after edit** — check protected markers intact
+5. **Rollback on failure** — restore from backup if verification fails
+6. **Log all changes** — document why each evolution was made
 
 ---
 

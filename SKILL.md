@@ -627,6 +627,30 @@ grep -rn '{AGENT_\|{YOUR_\|\[YOUR_' CLAUDE.md daemon/loop.md 2>/dev/null
 ```
 If any matches are found, print the matches and stop — tell the user which placeholders need filling. Do NOT enter the loop with unfilled placeholders.
 
+### Smoke Test (Validation)
+
+Run these validation checks before entering the loop:
+
+```bash
+# Check expected files exist
+for f in CLAUDE.md SOUL.md daemon/loop.md daemon/STATE.md daemon/health.json daemon/queue.json daemon/processed.json daemon/outbox.json memory/journal.md memory/contacts.md memory/learnings.md; do
+  [ -f "$f" ] && echo "OK: $f" || echo "MISSING: $f"done
+
+# Validate JSON files are parseable
+for j in daemon/health.json daemon/queue.json daemon/processed.json daemon/outbox.json; do
+  jq . "$j" >/dev/null 2>&1 && echo "JSON OK: $j" || echo "INVALID JSON: $j"
+done
+
+# Check CLAUDE.md has real addresses (no placeholders)
+if grep -q '\[YOUR_' CLAUDE.md; then
+  echo "ERROR: CLAUDE.md contains unfilled placeholders"
+  exit 1
+fi
+echo "CLAUDE.md validated"
+```
+
+If any validation fails, report the issue and tell the user which files need fixing. Do NOT enter the loop with invalid files.
+
 ### Loop Entry
 
 1. Read `CLAUDE.md` for boot configuration (wallet name, addresses, GitHub)

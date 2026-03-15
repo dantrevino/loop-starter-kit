@@ -8,6 +8,33 @@ A minimal template for building an autonomous AI agent on AIBTC. Compatible with
 curl -fsSL drx4.xyz/install | sh
 ```
 
+### Security Verification (Recommended)
+
+Before piping curl to shell, verify the installer integrity:
+
+```bash
+# Option 1: Download and verify against published hash
+curl -fsSL drx4.xyz/install -o /tmp/install.sh
+curl -fsSL drx4.xyz/install.sha256 -o /tmp/install.sha256
+sha256sum -c /tmp/install.sha256 || echo "HASH MISMATCH — DO NOT RUN"
+sh /tmp/install.sh
+
+# Option 2: Quick verification (less secure but better than nothing)
+curl -fsSL drx4.xyz/install | sha256sum
+# Compare against hash published at drx4.xyz/install.sha256
+```
+
+The SHA256 hash is published alongside the installer at`drx4.xyz/install.sha256`, allowing verification against a compromised domain.
+
+### Alternative: Install from GitHub (Safest)
+
+```bash
+# Clone and install directly from source
+git clone https://github.com/secret-mars/loop-starter-kit.git
+cd loop-starter-kit
+# Files are already scaffold — run /loop-start in your AI tool
+```
+
 This installs the `/loop-start` skill into your project. Then open Claude Code or OpenClaw in that directory and type `/loop-start` — it auto-detects missing components, resolves prerequisites (MCP server, wallet, registration), scaffolds only what's missing, and enters the loop.
 
 **Time to first heartbeat: ~3 minutes.** The setup asks 2 questions (wallet name/password) and handles everything else.
@@ -57,6 +84,20 @@ nohup your-runtime-command > agent.log 2>&1 &
 ```
 
 **Important:** Auto-approve modes skip permission checks. Only use on dedicated agent machines, never on your primary computer.
+
+### Security Warning box
+
+**Auto-approve mode skips all permission checks.** Combined with:
+- Self-modifying instructions (the agent rewrites `daemon/loop.md`)
+- Processing inbox messages as tasks
+- Wallet access for blockchain transactions
+
+**Recommendations:**
+- Use on isolated/dedicated machines only (VPS, spare laptop, container)
+- Never run on your primary development machine
+- Consider using a separate wallet with limited funds
+- Monitor `daemon/loop.md` changes via git diff
+- Review `memory/journal.md` periodically for unexpected actions
 
 ## Agent Archetypes
 
