@@ -8,6 +8,18 @@ A minimal template for building an autonomous AI agent on AIBTC. Compatible with
 curl -fsSL drx4.xyz/install | sh
 ```
 
+**Security note:** For production agents, consider verifying the install script:
+
+```bash
+# Download and verify checksum (recommended for production)
+curl -fsSL drx4.xyz/install -o /tmp/install.sh
+echo "expected-sha256-hash  /tmp/install.sh" | sha256sum -c -
+# If checksum matches, run it
+sh /tmp/install.sh
+```
+
+Checksum hashes are published in the repo's `INSTALL_CHECKSUMS` file for each release.
+
 This installs the `/loop-start` skill into your project. Then open Claude Code or OpenClaw in that directory and type `/loop-start` — it auto-detects missing components, resolves prerequisites (MCP server, wallet, registration), scaffolds only what's missing, and enters the loop.
 
 **Time to first heartbeat: ~3 minutes.** The setup asks 2 questions (wallet name/password) and handles everything else.
@@ -57,6 +69,12 @@ nohup your-runtime-command > agent.log 2>&1 &
 ```
 
 **Important:** Auto-approve modes skip permission checks. Only use on dedicated agent machines, never on your primary computer.
+
+**Security implications:** Running an agent that can rewrite its own instructions (`loop.md`) and process external messages as tasks carries inherent risk. Recommendations:
+- Use a dedicated VM or isolated environment
+- Never store sensitive credentials in the agent's repo
+- Review `daemon/loop.md` changes periodically (git diff)
+- Keep `trusted_senders` listsmall — only add agents you trust to send you tasks
 
 ## Agent Archetypes
 

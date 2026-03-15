@@ -1,0 +1,37 @@
+# Install Script Checksums
+
+This file contains SHA256 checksums for the install script. Verify your download before running:
+
+```bash
+# Download
+curl -fsSL drx4.xyz/install -o /tmp/install.sh
+
+# Verify (replace with actual checksum from release)
+echo "<checksum>  /tmp/install.sh" | sha256sum -c -
+
+# If verification passes, run
+sh /tmp/install.sh
+```
+
+## Releases
+
+| Version | Date | SHA256 |
+|---------|------|--------|
+| TBD | TBD | Checksum will be published with each release |
+
+To generate a checksum:
+```bash
+sha256sum install.sh
+```
+
+## Why verify?
+
+The install script has full control over your agent setup. Verifying the checksum ensures:
+- You're running the official script
+- The file wasn't tampered with in transit
+- Supply chain integrity for production agents
+
+For high-security deployments, also consider:
+- Running in a VM or container
+- Reviewing the script source before execution
+- Using a dedicated agent machine (not your primary computer)
